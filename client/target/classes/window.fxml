@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<VBox alignment="CENTER" prefWidth="675.0" spacing="20.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.khorolskiy.stockroom.client.Controller">
+   <children>
+       <HBox fx:id="mainMenu" alignment="CENTER" layoutX="Infinity" layoutY="Infinity">
+         <children>
+              <Button onAction="#create" prefHeight="34.0" prefWidth="155.0" text="Загрузить файл">
+               <font>
+                  <Font size="17.0" />
+               </font></Button>
+            <Pane prefHeight="34.0" prefWidth="25.0" />
+              <Button alignment="CENTER" onAction="#download" prefHeight="34.0" prefWidth="155.0" text="Скачать файл">
+               <font>
+                  <Font size="17.0" />
+               </font></Button>
+             <Pane prefHeight="34.0" prefWidth="25.0" />
+             <Button alignment="CENTER" onAction="#delete" prefHeight="34.0" prefWidth="155.0" text="Удалить файл">
+                 <font>
+                     <Font size="17.0" />
+                 </font></Button>
+         </children>
+       </HBox>
+       <HBox fx:id="createMenu" alignment="CENTER" layoutX="Infinity" layoutY="Infinity">
+          <children>
+              <TextField fx:id="fileToDownload" prefHeight="27.0" prefWidth="254.0" />
+              <Pane prefHeight="34.0" prefWidth="51.0" />
+              <Button alignment="CENTER" onAction="#sendCreate" prefHeight="34.0" prefWidth="138.0" text="Отправить файл" />
+          </children>
+       </HBox>
+       <HBox fx:id="downloadMenu" alignment="CENTER" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+         <children>
+            <SplitPane dividerPositions="0.45022288261515603" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+              <items>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="157.0" prefWidth="248.0">
+                   <children>
+                        <VBox prefHeight="200.0" prefWidth="167.0">
+                           <children>
+                             <Pane prefHeight="34.0" prefWidth="51.0" />
+                             <TextField fx:id="fileForDownload" prefHeight="27.0" prefWidth="125.0" />
+                           </children>
+                        </VBox>
+                       <Button alignment="CENTER" layoutX="177.0" layoutY="34.0" onAction="#sendDownload" prefHeight="27.0" prefWidth="122.0" text="скачать файл" />
+                        <Label layoutX="31.0" layoutY="6.0" prefHeight="17.0" prefWidth="254.0" text="Укажите имя файла для скачивания из БД" />
+                   </children>
+                </AnchorPane>
+                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="158.0" prefWidth="410.0">
+                     <children>
+                        <Label layoutX="129.0" layoutY="6.0" prefHeight="17.0" prefWidth="109.0" text="Ваши файлы в БД" />
+                        <TextArea layoutX="73.0" layoutY="23.0" prefHeight="134.0" prefWidth="234.0" />
+                     </children></AnchorPane>
+              </items>
+            </SplitPane>
+         </children>
+       </HBox>
+       <HBox fx:id="deleteMenu" alignment="CENTER" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+           <children>
+               <SplitPane dividerPositions="0.45022288261515603" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
+                   <items>
+                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="157.0" prefWidth="248.0">
+                           <children>
+                               <VBox prefHeight="200.0" prefWidth="167.0">
+                                   <children>
+                                       <Pane prefHeight="34.0" prefWidth="51.0" />
+                                       <TextField fx:id="fileToDelete" prefHeight="27.0" prefWidth="125.0" />
+                                   </children>
+                               </VBox>
+                               <Button alignment="CENTER" layoutX="177.0" layoutY="34.0" onAction="#sendDelete" prefHeight="27.0" prefWidth="122.0" text="удалить файл" />
+                               <Label layoutX="31.0" layoutY="6.0" prefHeight="17.0" prefWidth="254.0" text="Укажите имя файла для скачивания из БД" />
+                           </children>
+                       </AnchorPane>
+                       <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="158.0" prefWidth="410.0">
+                           <children>
+                               <Label layoutX="129.0" layoutY="6.0" prefHeight="17.0" prefWidth="109.0" text="Ваши файлы в БД" />
+                               <TextArea layoutX="73.0" layoutY="23.0" prefHeight="134.0" prefWidth="234.0" />
+                           </children></AnchorPane>
+                   </items>
+               </SplitPane>
+           </children>
+       </HBox>
+   </children>
+</VBox>
