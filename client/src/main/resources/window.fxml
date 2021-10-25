@@ -7,6 +7,56 @@
 
 <VBox alignment="CENTER" prefWidth="675.0" spacing="20.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.khorolskiy.stockroom.client.Controller">
    <children>
+       <HBox fx:id="preMenu" alignment="CENTER" layoutX="Infinity" layoutY="Infinity">
+           <children>
+               <Button onAction="#buttonSignUp" prefHeight="27.0" prefWidth="95.0" text="Sign Up" />
+               <Pane prefHeight="200.0" prefWidth="55.0" />
+               <Button onAction="#buttonSignIn" prefHeight="27.0" prefWidth="95.0" text="Sign In" />
+           </children>
+       </HBox>
+       <HBox fx:id="signInMenu" alignment="CENTER" layoutX="Infinity" layoutY="Infinity">
+           <children>
+            <Pane prefHeight="200.0" prefWidth="92.0" />
+               <TextField fx:id="nickname" promptText="Введите никнейм" />
+               <Pane prefHeight="200.0" prefWidth="55.0" />
+               <TextField fx:id="password" promptText="Введите пароль" />
+            <Pane prefHeight="200.0" prefWidth="33.0" />
+            <Button onAction="#AComeIn" prefHeight="27.0" prefWidth="73.0" text="Войти" />
+           </children>
+       </HBox>
+       <HBox fx:id="regMenu" alignment="CENTER" layoutX="Infinity" layoutY="Infinity">
+          <children>
+              <VBox>
+                 <children>
+                     <TextField fx:id="newLogin" />
+                  <Pane prefHeight="11.0" prefWidth="200.0" />
+                     <PasswordField fx:id="newPassword" />
+                  <Pane prefHeight="11.0" prefWidth="200.0" />
+                     <TextField fx:id="newNickname" />
+                 </children>
+              </VBox>
+              <VBox>
+                 <children>
+                     <Pane prefHeight="6.0" prefWidth="30.0" />
+                 </children>
+              </VBox>
+              <VBox prefHeight="103.0" prefWidth="176.0">
+                 <children>
+                  <Pane prefHeight="7.0" prefWidth="200.0" />
+                     <Label text="Введите логин" />
+                  <Pane prefHeight="20.0" prefWidth="200.0" />
+                     <Label text="Введите пароль" />
+                  <Pane prefHeight="21.0" prefWidth="200.0" />
+                     <Label text="Введите Никнейм" />
+                 </children>
+              </VBox>
+              <VBox>
+                 <children>
+                     <Button onAction="#registration" text="Регистрация" />
+                 </children>
+              </VBox>
+          </children>
+       </HBox>
        <HBox fx:id="mainMenu" alignment="CENTER" layoutX="Infinity" layoutY="Infinity">
          <children>
               <Button onAction="#create" prefHeight="34.0" prefWidth="155.0" text="Загрузить файл">

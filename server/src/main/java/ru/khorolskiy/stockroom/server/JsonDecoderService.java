@@ -1,4 +1,4 @@
-package ru.khorolskiy.stockroom.client;
+package ru.khorolskiy.stockroom.server;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.ChannelHandlerContext;
@@ -6,23 +6,18 @@ import io.netty.handler.codec.MessageToMessageDecoder;
 
 import java.util.List;
 
-public class JsonDecoder extends MessageToMessageDecoder<byte[]> {
+public class JsonDecoderService extends MessageToMessageDecoder<byte[]> {
     ObjectMapper om = new ObjectMapper();
 
     @Override
     protected void decode(ChannelHandlerContext ctx, byte[] msg, List<Object> out) throws Exception {
-        try {
-            ResponseFile responseFile = om.readValue(msg, ResponseFile.class);
-            out.add(responseFile);
-        } catch (Exception e) {
-            JsonDecoderService jsonDecoderService = new JsonDecoderService();
-            jsonDecoderService.decode(ctx, msg, out);
-        }
+        RequestService requestService = om.readValue(msg, RequestService.class);
+        out.add(requestService);
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-        System.out.println("trouble JsonDecoder");
+        System.out.println("trouble JsonDecoderService");
         super.exceptionCaught(ctx, cause);
     }
 }

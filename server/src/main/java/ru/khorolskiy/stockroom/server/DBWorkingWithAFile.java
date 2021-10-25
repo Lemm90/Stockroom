@@ -9,38 +9,38 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Base64;
 
-public class DBWorkingWithAFile extends SimpleChannelInboundHandler<Request> {
+public class DBWorkingWithAFile extends SimpleChannelInboundHandler<RequestFile> {
     public static final Logger LOGGER = LogManager.getLogger(DBWorkingWithAFile.class);
 
     @Override
-    protected void channelRead0(ChannelHandlerContext ctx, Request msg) {
-        switch (msg.getCommand()) { // Принимаем Реквест. В зависимости от поля command посылаем команды в БД.
+    protected void channelRead0(ChannelHandlerContext ctx, RequestFile requestFile) {
+        switch (requestFile.getCommand()) { // Принимаем Реквест. В зависимости от поля command посылаем команды в БД.
             case ("create"):
                 // Проверка на уникальность файла в БД. Если уникальный, то записываем в БД. Если нет, то обновляем имеющуюся запись
-                if (fileUniquenessCheck(msg.getUsername(), msg.getFilename(), msg.getExtension())) {
-                    downloadFileIntoBD(msg.getUsername(), msg.getFilename(), msg.getExtension(), msg.getSize(), bytesEncoder(msg.getArray()));
+                if (fileUniquenessCheck(requestFile.getUserID(), requestFile.getFilename(), requestFile.getExtension())) {
+                    downloadFileIntoBD(requestFile.getUserID(), requestFile.getFilename(), requestFile.getExtension(), requestFile.getSize(), bytesEncoder(requestFile.getArray()));
                 } else {
-                    updateFileIntoDB(bytesEncoder(msg.getArray()), msg.getSize(), msg.getUsername(), msg.getFilename());
+                    updateFileIntoDB(bytesEncoder(requestFile.getArray()), requestFile.getSize(), requestFile.getUserID(), requestFile.getFilename());
                 }
                 break;
             case ("delete"):
                 // если не уникальный, то удалить запись из БД
                 //todo надо подумать. Может надо в БД сделать флаг у файла. При удалении файла, снимать флаг с файла
                 // todo и не отображать файлы без флага. Таким образом можно восстанавливать файлы.
-                if (!fileUniquenessCheck(msg.getUsername(), msg.getFilename(), msg.getExtension())) {
-                    deletingFileFromDB(msg.getUsername(), msg.getFilename());
+                if (!fileUniquenessCheck(requestFile.getUserID(), requestFile.getFilename(), requestFile.getExtension())) {
+                    deletingFileFromDB(requestFile.getUserID(), requestFile.getFilename());
                 }
                 break;
             case ("download"):
                 // Скачивание файла. Создаем объект Респонз. Наполняем его данными из БД и отправляем клиенту.
-                Response response = new Response();
-                fillingResponse(response, msg);
-                ctx.channel().writeAndFlush(response);
+                ResponseFile responseFile = new ResponseFile();
+                fillingResponse(responseFile, requestFile);
+                ctx.channel().writeAndFlush(responseFile);
         }
     }
 
-    public boolean fileUniquenessCheck(String username, String fileName, String extension) {
-        String queryCheck = String.format("select id from userRoom where username = '%s' and fileName = '%s' and extension = '%s';", username, fileName, extension);
+    public boolean fileUniquenessCheck(int userID, String fileName, String extension) {
+        String queryCheck = String.format("select id from userRoom where id_user = '%d' and fileName = '%s' and extension = '%s';", userID, fileName, extension);
         try (
                 ResultSet rs = DBConnection.getStmt().executeQuery(queryCheck)) {
             while (rs.next())
@@ -51,9 +51,9 @@ public class DBWorkingWithAFile extends SimpleChannelInboundHandler<Request> {
         return true;
     }
 
-    public void downloadFileIntoBD(String username, String filename, String extension, Integer size, String array) {
-        String queryCreate = String.format("insert into userRoom (username, fileName, extension, size, array) " +
-                "values ('%s', '%s', '%s', '%d', '%s');", username, filename, extension, size, array);
+    public void downloadFileIntoBD(int userID, String filename, String extension, Integer size, String array) {
+        String queryCreate = String.format("insert into userRoom (id_user, fileName, extension, size, array) " +
+                "values ('%d', '%s', '%s', '%d', '%s');", userID, filename, extension, size, array);
         try {
             DBConnection.getStmt().executeUpdate(queryCreate);
             LOGGER.info(String.format("Загрузка файла '%s' в БД прошла успешно", filename));
@@ -74,8 +74,8 @@ public class DBWorkingWithAFile extends SimpleChannelInboundHandler<Request> {
         return base64Decoded;
     }
 
-    public void deletingFileFromDB(String username, String filename) {
-        String queryDelete = String.format("delete from userRoom where username = '%s' and fileName = '%s';", username, filename);
+    public void deletingFileFromDB(int userID, String filename) {
+        String queryDelete = String.format("delete from userRoom where id_user = '%d' and fileName = '%s';", userID, filename);
         try {
             DBConnection.getStmt().executeUpdate(queryDelete);
             LOGGER.info(String.format("Удаление файла '%s' из БД прошло успешно", filename));
@@ -84,8 +84,8 @@ public class DBWorkingWithAFile extends SimpleChannelInboundHandler<Request> {
         }
     }
 
-    public void updateFileIntoDB(String array, Integer size, String username, String filename) {
-        String queryUpdate = String.format("update userRoom set array = '%s', size = '%d' where username = '%s' and fileName = '%s';", array, size, username, filename);
+    public void updateFileIntoDB(String array, Integer size, int userID, String filename) {
+        String queryUpdate = String.format("update userRoom set array = '%s', size = '%d' where id_user = '%d' and fileName = '%s';", array, size, userID, filename);
         try {
             DBConnection.getStmt().executeUpdate(queryUpdate);
             LOGGER.info(String.format("Обновление файла '%s' в БД прошло успешно", filename));
@@ -94,8 +94,8 @@ public class DBWorkingWithAFile extends SimpleChannelInboundHandler<Request> {
         }
     }
 
-    public int setSizeFromDB(String username, String fileName, String extension) {
-        String query = String.format("select size from userRoom where username = '%s' and fileName = '%s' and extension = '%s';", username, fileName, extension);
+    public int setSizeFromDB(int userID, String fileName, String extension) {
+        String query = String.format("select size from userRoom where id_user = '%d' and fileName = '%s' and extension = '%s';", userID, fileName, extension);
         try (ResultSet rs = DBConnection.getStmt().executeQuery(query)) {
             while (rs.next())
                 return rs.getInt("size");
@@ -105,8 +105,8 @@ public class DBWorkingWithAFile extends SimpleChannelInboundHandler<Request> {
         return 0;
     }
 
-    public byte[] setArrayFromDB(String username, String fileName, String extension) {
-        String query = String.format("select array from userRoom where username = '%s' and fileName = '%s' and extension = '%s';", username, fileName, extension);
+    public byte[] setArrayFromDB(int userID, String fileName, String extension) {
+        String query = String.format("select array from userRoom where id_user = '%d' and fileName = '%s' and extension = '%s';", userID, fileName, extension);
         try (ResultSet rs = DBConnection.getStmt().executeQuery(query)) {
             while (rs.next()) {
                 String array = rs.getString("array"); // вычитываем строку из БД
@@ -118,12 +118,12 @@ public class DBWorkingWithAFile extends SimpleChannelInboundHandler<Request> {
         return null;
     }
 
-    public void fillingResponse(Response response, Request msg) {
+    public void fillingResponse(ResponseFile responseFile, RequestFile msg) {
         // Заполняем Респонз данными для отправки их клиенту
-        response.setFilename(msg.getFilename());
-        response.setExtension(msg.getExtension());
-        response.setSize(setSizeFromDB(msg.getUsername(), msg.getFilename(), msg.getExtension()));
-        response.setArray(setArrayFromDB(msg.getUsername(), msg.getFilename(), msg.getExtension()));
+        responseFile.setFilename(msg.getFilename());
+        responseFile.setExtension(msg.getExtension());
+        responseFile.setSize(setSizeFromDB(msg.getUserID(), msg.getFilename(), msg.getExtension()));
+        responseFile.setArray(setArrayFromDB(msg.getUserID(), msg.getFilename(), msg.getExtension()));
     }
 }
 

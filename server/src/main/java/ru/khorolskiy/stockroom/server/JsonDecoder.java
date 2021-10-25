@@ -11,8 +11,13 @@ public class JsonDecoder extends MessageToMessageDecoder<byte[]> {
 
     @Override
     protected void decode(ChannelHandlerContext ctx, byte[] msg, List<Object> out) throws Exception {
-        Request request = om.readValue(msg, Request.class);
-        out.add(request);
+          try {
+              RequestFile requestFile = om.readValue(msg, RequestFile.class);
+              out.add(requestFile);
+          } catch (Exception e) {
+              JsonDecoderService jsonDecoderService = new JsonDecoderService();
+              jsonDecoderService.decode(ctx, msg, out);
+          }
     }
 
     @Override

@@ -1,5 +1,7 @@
 package ru.khorolskiy.stockroom.server;
 
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.SimpleChannelInboundHandler;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -10,12 +12,30 @@ import java.sql.SQLException;
 // В клиенте еще не реализовал функцию регистрации/авторизации
 // Что бы различать клиентов в Реквесте в поле userName добавляется имя пользователя ПК
 
-public class DBWorkWithTheUser {
+public class DBWorkWithTheUser extends SimpleChannelInboundHandler <RequestService> {
+    @Override
+    protected void channelRead0(ChannelHandlerContext ctx, RequestService requestService) throws Exception {
+        ResponseService responseService = new ResponseService();
+        int userID;
+        switch (requestService.getCommand()){
+            case ("registration"):
+                   userID = registration(requestService.getUsername(), requestService.getPassword(), requestService.getNickname());
+                   responseService.setCommand("userID: " + userID);
+                System.out.println(responseService.getCommand());
+                   ctx.channel().writeAndFlush(responseService).sync();
+                   break;
+            case ("authorization"):
+                userID = authorization(requestService.getNickname(), requestService.getPassword());
+                responseService.setCommand("userID: " + userID);
+                ctx.channel().writeAndFlush(responseService).sync();
+                break;
+        }
+    }
     public static final Logger LOGGER = LogManager.getLogger(DBWorkWithTheUser.class);
 
-    public int authorization(String login, String password) throws SQLException {
+    public int authorization(String nickname, String password) throws SQLException {
 
-        String query = String.format("select id from user where login = '%s' and password = '%s';", login, password);
+        String query = String.format("select id from user where nickname = '%s' and password = '%s';", nickname, password);
         LOGGER.info("Команда в DB: " + query);
         try (ResultSet rs = DBConnection.getStmt().executeQuery(query)) {
             while (rs.next())
@@ -25,25 +45,24 @@ public class DBWorkWithTheUser {
     }
 
 
-    public int registration(String firstname, String lastname, String password, String login) throws SQLException {
-        String query = String.format("insert into user (firstname, lastname, password, login) values ('%s', '%s', '%s', '%s');", firstname, lastname, password, login);
+    public int registration(String username, String password, String nickname) throws SQLException {
+        String query = String.format("insert into user (username, password, nickname) values ('%s', '%s', '%s');", username, password, nickname);
         LOGGER.info("Команда в DB: " + query);
         try {
             DBConnection.getStmt().executeUpdate(query);
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return authorization(login, password);
+        return authorization(nickname, password);
     }
 
-    public boolean checkForUniqueness(String login) throws SQLException {
-        String query = String.format("select * from user where login = '%s';", login);
+    public boolean nicknameCheckForUniqueness(String nickname) throws SQLException {
+        String query = String.format("select * from user where nickname = '%s';", nickname);
         LOGGER.info("Команда в DB: " + query);
         try (ResultSet rs = DBConnection.getStmt().executeQuery(query)) {
             while (rs.next())
-                return true;
+                return false;
         }
-        return false;
+        return true;
     }
-
 }

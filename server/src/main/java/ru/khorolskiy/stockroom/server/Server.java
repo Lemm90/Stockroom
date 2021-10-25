@@ -46,6 +46,7 @@ public class Server {
                                     new ByteArrayEncoder(),
                                     new JsonDecoder(),
                                     new JsonEncoder(),
+                                    new DBWorkWithTheUser(),
                                     new DBWorkingWithAFile());
                         }
                     })
