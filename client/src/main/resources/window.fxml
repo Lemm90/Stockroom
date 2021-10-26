@@ -19,7 +19,7 @@
             <Pane prefHeight="200.0" prefWidth="92.0" />
                <TextField fx:id="nickname" promptText="Введите никнейм" />
                <Pane prefHeight="200.0" prefWidth="55.0" />
-               <TextField fx:id="password" promptText="Введите пароль" />
+               <PasswordField fx:id="password" promptText="Введите пароль" />
             <Pane prefHeight="200.0" prefWidth="33.0" />
             <Button onAction="#AComeIn" prefHeight="27.0" prefWidth="73.0" text="Войти" />
            </children>

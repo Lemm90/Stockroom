@@ -3,6 +3,7 @@ package ru.khorolskiy.stockroom.client;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
@@ -19,10 +20,10 @@ public class Controller implements Initializable {
     HBox preMenu, mainMenu, createMenu, downloadMenu, deleteMenu, signInMenu, regMenu;
 
     @FXML
-    TextField fileToDownload, fileForDownload, fileToDelete, nickname, password, newLogin, newNickname;
+    TextField fileToDownload, fileForDownload, fileToDelete, nickname,  newLogin, newNickname;
 
     @FXML
-    PasswordField newPassword;
+    PasswordField password, newPassword;
 
     private String command;
 
@@ -63,25 +64,34 @@ public class Controller implements Initializable {
     }
 
     public void sendCreate(ActionEvent actionEvent) {
-        RequestFile requestFile = new RequestFile();
-        try {
-            Client.getChannel().channel().writeAndFlush(fillingRequestFile(requestFile, getCommand(), fileToDownload.getText())).sync();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (fileToDownload.getText().isEmpty()) {
+            showErrorAlert("Поле не заполнено");
+        } else {
+            RequestFile requestFile = new RequestFile();
+            try {
+                Client.getChannel().channel().writeAndFlush(fillingRequestFile(requestFile, getCommand(), fileToDownload.getText())).sync();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            fileToDownload.clear();
+            boxVisible("mainMenu");
         }
-        fileToDownload.clear();
-        boxVisible("mainMenu");
     }
 
     public void sendDelete(ActionEvent actionEvent) {
-        RequestFile requestFile = new RequestFile();
-        try {
-            Client.getChannel().channel().writeAndFlush(fillingRequestFile(requestFile, getCommand(), fileToDelete.getText())).sync();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-        fileToDelete.clear();
-        boxVisible("mainMenu");
+        if(fileToDelete.getText().isEmpty()){
+            showErrorAlert("Поле не заполнено");
+        } else {
+            RequestFile requestFile = new RequestFile();
+            try {
+                Client.getChannel().channel().writeAndFlush(fillingRequestFile(requestFile, getCommand(), fileToDelete.getText())).sync();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            fileToDelete.clear();
+            boxVisible("mainMenu");
+          }
+
     }
 
     public RequestFile fillingRequestFile(RequestFile requestFile, String command, String file) {
@@ -109,14 +119,18 @@ public class Controller implements Initializable {
     }
 
     public void sendDownload(ActionEvent actionEvent) {
-        RequestFile requestFile = new RequestFile();
-        try {
-            Client.getChannel().channel().writeAndFlush(fillingRequestFile(requestFile, getCommand(), fileForDownload.getText())).sync();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if(fileForDownload.getText().isEmpty()){
+            showErrorAlert("Поле не заполнено");
+        } else {
+            RequestFile requestFile = new RequestFile();
+            try {
+                Client.getChannel().channel().writeAndFlush(fillingRequestFile(requestFile, getCommand(), fileForDownload.getText())).sync();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            fileForDownload.clear();
+            boxVisible("mainMenu");
         }
-        fileForDownload.clear();
-        boxVisible("mainMenu");
     }
 
     public void boxVisible(String command) {
@@ -174,26 +188,35 @@ public class Controller implements Initializable {
     }
 
     public void AComeIn(ActionEvent actionEvent) {
-        RequestService requestService = new RequestService();
-        fillingRequestService(requestService, "authorization", null, password.getText(), nickname.getText());
-        try {
-            Client.getChannel().channel().writeAndFlush(requestService).sync();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if(password.getText().isEmpty() || nickname.getText().isEmpty()){
+            showErrorAlert("Все поля должны быть заполнены");
+        } else {
+            RequestService requestService = new RequestService();
+            fillingRequestService(requestService, "authorization", null, password.getText(), nickname.getText());
+            try {
+                Client.getChannel().channel().writeAndFlush(requestService).sync();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            clearingBox(signInMenu);
+            boxVisible("mainMenu");
         }
-        clearingBox(signInMenu);
-        boxVisible("mainMenu");
+
     }
 
     public void registration(ActionEvent actionEvent) {
-        RequestService requestService = new RequestService();
-        try {
-            Client.getChannel().channel().writeAndFlush(fillingRequestService(requestService,"registration", newLogin.getText(), newPassword.getText(), newNickname.getText())).sync();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        if (newLogin.getText().isEmpty() || newPassword.getText().isEmpty() || newNickname.getText().isEmpty()) {
+            showErrorAlert("Все поля должны быть заполнены");
+        } else {
+            RequestService requestService = new RequestService();
+            try {
+                Client.getChannel().channel().writeAndFlush(fillingRequestService(requestService, "registration", newLogin.getText(), newPassword.getText(), newNickname.getText())).sync();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            clearingBox(regMenu);
+            boxVisible("mainMenu");
         }
-        clearingBox(regMenu);
-        boxVisible("mainMenu");
     }
 
    public void clearingBox(HBox hBox){
@@ -208,5 +231,20 @@ public class Controller implements Initializable {
 
    }
 
+   public void showErrorAlert(String text){
+       Alert alert = new Alert(Alert.AlertType.ERROR);
+       alert.setContentText(text);
+       alert.setTitle("Stockroom");
+       alert.setHeaderText(null);
+       alert.showAndWait();
+   }
+
+    public void showComplitedAlert(String text){
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setContentText(text);
+        alert.setTitle("Stockroom");
+        alert.setHeaderText(null);
+        alert.showAndWait();
+    }
 
 }
